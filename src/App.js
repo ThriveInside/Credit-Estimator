@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 
-function App() {
+const CreditCalculator = () => {
   const [currentEPRD, setCurrentEPRD] = useState('');
   const [mccPerYear, setMccPerYear] = useState('');
   const [racPerYear, setRacPerYear] = useState('');
@@ -19,12 +18,31 @@ function App() {
     { id: 'plmp', name: 'PLMP', days: 90, monthsToComplete: 12 }
   ];
 
-  const resetForm = () => {
-    setCurrentEPRD('');
-    setMccPerYear('');
-    setRacPerYear('');
-    setEducation([]);
-    setDateError('');
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const calculateTimeSaved = (originalDate, newDate) => {
+    const diffTime = Math.abs(originalDate - newDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const years = Math.floor(diffDays / 365);
+    const remainingDays = diffDays % 365;
+    const months = Math.floor(remainingDays / 30);
+
+    let timeString = '';
+    if (years > 0) {
+      timeString += `${years} year${years !== 1 ? 's' : ''}`;
+    }
+    if (months > 0) {
+      if (timeString) timeString += ' and ';
+      timeString += `${months} month${months !== 1 ? 's' : ''}`;
+    }
+    if (!timeString) timeString = 'Less than 1 month';
+    return timeString;
   };
 
   const handleDateChange = (e) => {
@@ -77,19 +95,25 @@ function App() {
     let totalRACDays = 0;
 
     let currentDate = new Date(TODAY);
-    let year = 1;
+    let year = currentDate.getFullYear();
 
     while (currentDate < projectedDate) {
       const remainingDays = (projectedDate - currentDate) / (1000 * 60 * 60 * 24);
       if (remainingDays < 60) break;
 
+      yearlyCredits.push({
+        year,
+        mccDays: yearlyMCCDays,
+        racDays: yearlyRACDays,
+        totalDays: yearlyMCCDays + yearlyRACDays
+      });
+
       projectedDate.setDate(projectedDate.getDate() - (yearlyMCCDays + yearlyRACDays));
       totalMCCDays += yearlyMCCDays;
       totalRACDays += yearlyRACDays;
-      yearlyCredits.push({ year, mccDays: yearlyMCCDays, racDays: yearlyRACDays });
 
-      currentDate.setFullYear(currentDate.getFullYear() + 1);
       year++;
+      currentDate.setFullYear(currentDate.getFullYear() + 1);
     }
 
     if (projectedDate < TODAY) {
@@ -99,46 +123,43 @@ function App() {
     return {
       originalDate: eprdDate,
       newDate: projectedDate,
-      breakdown: { mccDays: totalMCCDays, racDays: totalRACDays, educationDays, yearlyCredits }
+      timeSaved: calculateTimeSaved(eprdDate, projectedDate),
+      breakdown: {
+        mccDays: totalMCCDays,
+        racDays: totalRACDays,
+        educationDays,
+        yearlyCredits
+      }
     };
-  };
-
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   const result = calculateRelease();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Thrive Inside Credit Estimator</h1>
-            <p className="text-gray-600">Calculate your potential release date</p>
+      <div className="sticky top-0 z-10 bg-gray-100 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-2">
+          <div className="text-center mb-2">
+            <h1 className="text-xl font-bold text-gray-900">Thrive Inside Credit Estimator</h1>
           </div>
           {result && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-lg border p-4"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div className="bg-white rounded-lg border p-3">
+              <div className="flex items-center justify-center gap-4">
                 <div className="text-center">
                   <div className="text-sm text-gray-600">Current Release Date</div>
-                  <div className="text-xl font-medium">{formatDate(result.originalDate)}</div>
+                  <div className="text-lg font-medium">{formatDate(result.originalDate)}</div>
                 </div>
+                <div className="text-2xl text-gray-400">→</div>
                 <div className="text-center">
                   <div className="text-sm text-green-600">New Projected Release</div>
-                  <div className="text-xl font-bold text-green-600">{formatDate(result.newDate)}</div>
+                  <div className="text-lg font-bold text-green-600">{formatDate(result.newDate)}</div>
                 </div>
               </div>
-            </motion.div>
+              <div className="text-center border-t mt-2 pt-2">
+                <div className="text-sm text-gray-600">Time Saved</div>
+                <div className="text-lg font-bold text-gray-900">{result.timeSaved}</div>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -199,8 +220,8 @@ function App() {
                 return (
                   <button
                     key={program.id}
-                    onClick={() => setEducation((prev) =>
-                      isSelected ? prev.filter((id) => id !== program.id) : [...prev, program.id]
+                    onClick={() => setEducation(prev =>
+                      isSelected ? prev.filter(id => id !== program.id) : [...prev, program.id]
                     )}
                     className={`p-3 rounded text-left ${
                       isSelected
@@ -219,42 +240,56 @@ function App() {
           </div>
 
           {result && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-lg shadow p-6"
-            >
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Credit Breakdown</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-gray-50 rounded p-4">
-                  <div className="text-sm font-medium text-blue-600">EMC Credits</div>
-                  <div className="text-2xl font-bold">{result.breakdown.educationDays} days</div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-medium text-gray-900 mb-3">Credit Breakdown</h3>
+              <div className="space-y-3">
+                <div className="grid grid-cols-4 gap-2 text-sm">
+                  <div className="bg-gray-50 rounded p-2">
+                    <div className="font-medium text-blue-600">EMC Credits</div>
+                    <div className="text-lg font-bold">{result.breakdown.educationDays}</div>
+                  </div>
+                  <div className="bg-gray-50 rounded p-2">
+                    <div className="font-medium text-blue-600">MCC Credits</div>
+                    <div className="text-lg font-bold">{result.breakdown.mccDays}</div>
+                  </div>
+                  <div className="bg-gray-50 rounded p-2">
+                    <div className="font-medium text-blue-600">RAC Credits</div>
+                    <div className="text-lg font-bold">{result.breakdown.racDays}</div>
+                  </div>
+                  <div className="bg-gray-50 rounded p-2">
+                    <div className="font-medium text-blue-600">Total Credits</div>
+                    <div className="text-lg font-bold">
+                      {result.breakdown.educationDays + result.breakdown.mccDays + result.breakdown.racDays}
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-gray-50 rounded p-4">
-                  <div className="text-sm font-medium text-blue-600">MCC Credits</div>
-                  <div className="text-2xl font-bold">{result.breakdown.mccDays} days</div>
-                </div>
-                <div className="bg-gray-50 rounded p-4">
-                  <div className="text-sm font-medium text-blue-600">RAC Credits</div>
-                  <div className="text-2xl font-bold">{result.breakdown.racDays} days</div>
+
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-1">Credits by Year</div>
+                  <div className="grid grid-cols-4 gap-2 text-sm">
+                    {result.breakdown.yearlyCredits.map((credit, index) => (
+                      <div key={index} className="bg-gray-50 rounded p-2">
+                        <div className="font-medium text-gray-600">{credit.year}</div>
+                        <div className="text-xs">
+                          MCC: {credit.mccDays}<br/>
+                          RAC: {credit.racDays}<br/>
+                          <span className="font-medium">Total: {credit.totalDays}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-
-          <div className="text-center">
-            <button
-              onClick={resetForm}
-              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Reset Calculator
-            </button>
-          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+const App = () => {
+  return <CreditCalculator />;
+};
 
 export default App;
