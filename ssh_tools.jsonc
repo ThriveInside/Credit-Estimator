@@ -1,0 +1,66 @@
+{
+	"test": {
+		"host": "0.0.0.0",
+		"port": 22,
+		"username": "",
+		"password": "",
+		"proxy": false,
+		"upload_on_save": true,
+		"watch": true,
+		"submit_git_before_upload": true,
+		"submit_git_msg": "",
+		"compress": true,
+		"remote_unpacked": true,
+		"delete_remote_compress": true,
+		"delete_local_compress": true,
+		"upload_to_root": false,
+		"deleteRemote": false,
+		"distPath": [],
+		"remotePath": "/www/wwwtest/test",
+		"excludePath": []
+	},
+	"10Web": {
+		"host": "0.0.0.0",
+		"port": 22,
+		"username": "",
+		"password": "",
+		"proxy": false,
+		"upload_on_save": true,
+		"watch": true,
+		"submit_git_before_upload": true,
+		"submit_git_msg": "",
+		"compress": true,
+		"remote_unpacked": true,
+		"delete_remote_compress": true,
+		"delete_local_compress": true,
+		"upload_to_root": false,
+		"deleteRemote": false,
+		"distPath": [],
+		"remotePath": "/www/wwwtest/test",
+		"excludePath": []
+	}
+	// Reference configuration
+	// Environment name, supports custom names
+	// "test": { // Test environment
+	//     "host": "0.0.0.0", // (required) Server address
+	//     "port": 22, // (optional) Port number, default is 22
+	//     "username": "username", // (required) Login username
+	//     "password": "password", // Login password (or private key path, either one is required)
+	//     // "privateKeyPath": "/your_path/id_rsa", // Private key path (or password, either one is required). Note: It's better not to put the key in the code root directory
+	//  "proxy": false, // Whether to use proxy, default false
+	//     "upload_on_save": false, // Real-time upload on save, recommended for single-person development. When upload_on_save is set to true, watch, submit_git_before_upload, compress, deleteRemote are invalid. Default is false
+	//     "watch": true, //listen for file changes in the upload directory, the default is true, if the upload_on_save is true, this item is invalid. If the distPath directory is configured, only listen for file changes in the distPath directory
+	//     "submit_git_before_upload": true, // Used for team development, commit local git before uploading code to prevent overwriting remote code. Default is false
+	//     "submit_git_msg": "", // Git commit message configuration, default is empty. If submit_git_before_upload is true and not filled, a prompt box will appear to manually fill it in
+	//     // "build": "yarn build:test", // (optional) Build command to execute. Uncomment this line if it's a front-end project
+	//     "compress": true, // Whether to compress the upload and remote decompression (the account needs to support SSH login, the system will automatically detect if it's supported, if not supported, it will not compress the upload). Default is false
+	//"remote_unpacked": true, // Whether to decompress the compressed file remotely after uploading, default true
+	// "delete_remote_compress": true, // Whether to delete the zip file after uploading, default true
+	//"delete_local_compress": true, // Whether to delete the local compressed file after uploading the compressed file, the default is true
+	//     "upload_to_root": false, // If there is only one distPath configuration directory, it is uploaded to the remotePath root directory. It is generally used to deploy front-end code. The default value is false
+	//     "deleteRemote": false, // Whether to delete the remote distPath configuration directory before uploading. Generally used to clean up front-end deployment code. Default is false
+	//     "distPath": [], // (optional) Local directories to upload, supports string or array. Default is the root directory
+	//     "remotePath": "/www/wwwtest/test", // (required) Server upload path
+	//     "excludePath": [] // (optional) Files and directories to exclude for the current environment, will be merged with the plugin configuration excludePath. When using gitignore, it will be merged with the .gitignore configuration file
+	// }
+}
